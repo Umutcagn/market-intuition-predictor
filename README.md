@@ -83,3 +83,16 @@ Open `http://localhost:5173` in your browser.
 ```bash
 npm run build
 ```
+
+---
+
+## ⚖️ Legal & Educational Disclaimer
+
+> [!IMPORTANT]
+> **Academic & Cognitive Simulation Notice:**  
+> This application is developed strictly for **academic, cognitive psychology, and educational pattern-recognition research**. It models human heuristic decision-making processes under uncertainty using historical financial charting data.
+> 
+> - **No Financial or Investment Advice:** This project does **not** offer, provide, or constitute financial, investment, legal, or tax advice. It does not generate or distribute trading signals or portfolio management recommendations.
+> - **Zero Real Transactions:** There is no execution layer, brokerage API connection, digital wallet, or real-money transaction capability within this software.
+> - All charting scenarios are historical snapshots utilized exclusively for offline pattern-matching exercises.
+
