@@ -1,5 +1,7 @@
 # Market Intuition & Pattern Recognition Web Tool
 
+[![CI](https://github.com/Umutcagn/market-intuition-predictor/actions/workflows/ci.yml/badge.svg)](https://github.com/Umutcagn/market-intuition-predictor/actions/workflows/ci.yml)
+
 A web-based financial training and decision-support application built with React 19, Vite, and Lightweight Charts. Modeled after heuristic decision-making and pattern recognition principles (inspired by the classic tacit-knowledge heuristic concept), allowing users to train intuition on market candle formations without relying solely on explicit technical indicators.
 
 ---
@@ -46,6 +48,9 @@ src/
 ├── data/
 │   └── scenarios.json         # Historical price datasets & scenarios
 │
+├── lib/
+│   └── scoring.js             # Outcome evaluation & next-scenario selection
+│
 ├── App.jsx                    # Core game loop & trial state management
 ├── main.jsx                   # Application entry point
 └── index.css                  # Tailwind styles
@@ -83,6 +88,25 @@ Open `http://localhost:5173` in your browser.
 ```bash
 npm run build
 ```
+
+---
+
+## Scenarios & Scoring
+
+`src/data/scenarios.json` holds 56 scenarios cut from two years of daily Yahoo Finance data (`scripts/fetch_scenarios.py`): 55 visible candles, then 20 hidden candles that are revealed after the prediction. Time is re-indexed from 0 so the asset and dates stay anonymous.
+
+- **Direction mode:** correct if LONG/SHORT matches the sign of the move from the last visible close to the final hidden close.
+- **Target mode:** the clicked target must be on the correct side of the last close **and** within 12% (of the last price) of the actual final close.
+
+The set has 30 LONG and 26 SHORT outcomes, so always answering LONG scores 53.6%; accuracy should be read against that baseline rather than 50%.
+
+## Tests
+
+```bash
+npm test
+```
+
+Uses Node's built-in test runner (no extra dependencies). Covers the scoring rules, the no-repeat scenario picker and the integrity of the scenario data (candle counts, continuous time axis, valid OHLC ranges, `lastPrice` / `futureClose` matching the candles, outcome direction matching the realized move). CI runs lint, tests and the production build on every push.
 
 ---
 

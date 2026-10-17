@@ -6,6 +6,7 @@ import OutcomeModal from './components/OutcomeModal';
 import HelpModal from './components/HelpModal';
 import SessionSummaryModal from './components/SessionSummaryModal';
 import rawScenarios from './data/scenarios.json';
+import { evaluatePrediction, pickNextScenarioIndex } from './lib/scoring';
 
 const MAX_TRIALS = 5;
 
@@ -82,18 +83,7 @@ export default function App() {
         setGameState('REVEALED');
 
         // Evaluate outcome
-        const outcome = currentScenario.outcome;
-        let won = false;
-
-        if (prediction.targetPrice) {
-          // Target Mode: won if price reached the same direction and within 50% relative accuracy
-          const priceDiffPct = Math.abs((outcome.futureClose - prediction.targetPrice) / currentScenario.lastPrice) * 100;
-          const predictedDir = prediction.targetPrice >= currentScenario.lastPrice ? 'LONG' : 'SHORT';
-          won = (predictedDir === outcome.direction) && (priceDiffPct <= 12.0);
-        } else {
-          // Pure Direction Mode
-          won = prediction.direction === outcome.direction;
-        }
+        const won = evaluatePrediction(currentScenario, prediction);
 
         setTotalTrials(prev => prev + 1);
         if (won) {
@@ -144,7 +134,7 @@ export default function App() {
 
     setCurrentTrialIndex(prev => prev + 1);
     // Randomize next scenario to prevent sequential bias
-    setScenarioIndex(prev => Math.floor(Math.random() * availableScenarios.length));
+    setScenarioIndex(prev => pickNextScenarioIndex(prev, availableScenarios.length));
   }, [gameState, isUnlimitedMode, currentTrialIndex, availableScenarios.length]);
 
   // Global Keyboard Navigation
@@ -188,19 +178,13 @@ export default function App() {
     setCurrentTrialIndex(0);
     setReactionTimes([]);
     setIsSummaryOpen(false);
-    setScenarioIndex(Math.floor(Math.random() * availableScenarios.length));
+    setScenarioIndex(prev => pickNextScenarioIndex(prev, availableScenarios.length));
   };
 
   // Determine isCorrect for outcome banner
   const isCorrect = useMemo(() => {
     if (!userPrediction || gameState !== 'REVEALED') return false;
-    const outcome = currentScenario.outcome;
-    if (userPrediction.targetPrice) {
-      const priceDiffPct = Math.abs((outcome.futureClose - userPrediction.targetPrice) / currentScenario.lastPrice) * 100;
-      const predictedDir = userPrediction.targetPrice >= currentScenario.lastPrice ? 'LONG' : 'SHORT';
-      return (predictedDir === outcome.direction) && (priceDiffPct <= 12.0);
-    }
-    return userPrediction.direction === outcome.direction;
+    return evaluatePrediction(currentScenario, userPrediction);
   }, [userPrediction, gameState, currentScenario]);
 
   return (
